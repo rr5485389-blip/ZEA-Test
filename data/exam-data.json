@@ -1,0 +1,163 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "text": "What does REST stand for?",
+      "opts": [
+        "Representational State Transfer",
+        "Remote Execution Service Toolkit",
+        "Reliable Endpoint Status Transfer",
+        "Recursive State Transformation"
+      ],
+      "correct": 0
+    },
+    {
+      "id": 2,
+      "text": "What is the HTTP status code for \"Not Found\"?",
+      "opts": [
+        "200",
+        "403",
+        "404",
+        "500"
+      ],
+      "correct": 2
+    },
+    {
+      "id": 3,
+      "text": "In JavaScript, what is a closure?",
+      "opts": [
+        "A function bundled together with references to its surrounding lexical environment",
+        "A method to close active database connections automatically",
+        "An HTML closing tag validator in the browser",
+        "A syntax error caused by unclosed parentheses in loops"
+      ],
+      "correct": 0
+    },
+    {
+      "id": 4,
+      "text": "Which data structure operates on a First-In-First-Out (FIFO) principle?",
+      "opts": [
+        "Stack",
+        "Queue",
+        "Binary Search Tree",
+        "Hash Table"
+      ],
+      "correct": 1
+    },
+    {
+      "id": 5,
+      "text": "In Git, which command is used to combine changes from one branch into another?",
+      "opts": [
+        "git push",
+        "git merge",
+        "git clone",
+        "git commit"
+      ],
+      "correct": 1
+    },
+    {
+      "id": 6,
+      "text": "What does CSS stand for?",
+      "opts": [
+        "Cascading Style Sheets",
+        "Computer Screen Styles",
+        "Creative Styling Syntax",
+        "Centralized Sheet Structure"
+      ],
+      "correct": 0
+    },
+    {
+      "id": 7,
+      "text": "Which SQL clause is used to filter records returned by a query?",
+      "opts": [
+        "ORDER BY",
+        "GROUP BY",
+        "WHERE",
+        "LIMIT"
+      ],
+      "correct": 2
+    },
+    {
+      "id": 8,
+      "text": "What is the average time complexity of searching by key in a standard Hash Map?",
+      "opts": [
+        "O(n)",
+        "O(log n)",
+        "O(1)",
+        "O(n^2)"
+      ],
+      "correct": 2
+    },
+    {
+      "id": 9,
+      "text": "In React, which hook is primarily used to perform side effects in functional components?",
+      "opts": [
+        "useState",
+        "useEffect",
+        "useMemo",
+        "useReducer"
+      ],
+      "correct": 1
+    },
+    {
+      "id": 10,
+      "text": "What does JSON stand for?",
+      "opts": [
+        "JavaScript Object Notation",
+        "Java Standard Object Network",
+        "Joined Script Operating Node",
+        "JavaScript Output Name"
+      ],
+      "correct": 0
+    },
+    {
+      "id": 11,
+      "text": "Which protocol is typically used to encrypt web traffic between a browser and a server?",
+      "opts": [
+        "FTP",
+        "HTTPS / TLS",
+        "SSH",
+        "Telnet"
+      ],
+      "correct": 1
+    },
+    {
+      "id": 12,
+      "text": "In database transactions, what does the \"A\" in ACID stand for?",
+      "opts": [
+        "Atomicity",
+        "Asynchrony",
+        "Availability",
+        "Authentication"
+      ],
+      "correct": 0
+    }
+  ],
+  "settings": {
+    "timeLimitMin": 4,
+    "questionCount": 4,
+    "maxSwitches": 3,
+    "passingScore": 70
+  },
+  "candidates": [
+    {
+      "id": 1790399442943,
+      "name": "ee",
+      "date": "2026-09-26T05:10:42.943Z",
+      "score": 0,
+      "total": 4,
+      "switches": 0,
+      "status": "completed"
+    },
+    {
+      "id": 1790399388083,
+      "name": "ee",
+      "date": "2026-09-26T05:09:48.083Z",
+      "score": 2,
+      "total": 10,
+      "switches": 3,
+      "status": "flagged"
+    }
+  ],
+  "pw": "admin123"
+}

@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interview Test Platform</title>
+<meta name="description" content="Technical interview assessment platform with customizable questions, candidate proctoring, and real-time exam settings.">
+<meta property="og:title" content="Interview Test Platform">
+<meta property="og:description" content="Technical interview assessment platform with customizable questions, candidate proctoring, and real-time exam settings.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{
+  --ink:#12161C; --paper:#F7F8FA; --line:#DDE1E7; --blue:#2E5EAA; --blue-dim:#EAF0FB;
+  --green:#1F8A5F; --amber:#C77D22; --red:#B3402A; --muted:#5B6472;
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#F7F8FA; }
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;background:var(--paper);color:var(--ink);}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+mono{font-family: ui-monospace, "SF Mono", Consolas, monospace;}
+.hidden{display:none !important;}
+.wrap{max-width:640px;margin:0 auto;padding:48px 24px;}
+.bar{background:var(--ink);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;}
+.bar .brand{font-weight:600;letter-spacing:.2px;}
+.bar .sub{font-family:ui-monospace,monospace;font-size:12px;color:#9BA6B5;}
+h1{font-size:28px;font-weight:600;margin:0 0 8px;line-height:1.2;}
+h2{font-size:20px;font-weight:600;margin:0 0 16px;}
+p.lede{color:var(--muted);margin:0 0 28px;line-height:1.5;}
+input[type=text],input[type=password]{
+  width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:4px;
+  font-size:16px;background:#fff;color:var(--ink);
+}
+input:focus{outline:2px solid var(--blue);outline-offset:1px;}
+button{
+  font-size:15px;font-weight:600;padding:11px 20px;border-radius:4px;border:1px solid var(--ink);
+  background:var(--ink);color:#fff;cursor:pointer;
+}
+button.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);}
+button.link{background:none;border:none;color:var(--blue);font-weight:500;padding:4px 0;text-decoration:underline;}
+button:disabled{opacity:.4;cursor:not-allowed;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+hr{border:none;border-top:1px solid var(--line);margin:24px 0;}
+
+/* candidate test screen */
+.testbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--line);background:#fff;}
+.testbar .name{font-weight:600;}
+.testbar .prog{font-family:ui-monospace,monospace;font-size:13px;color:var(--muted);}
+.qwrap{max-width:640px;margin:0 auto;padding:40px 24px;}
+.qnum{font-family:ui-monospace,monospace;color:var(--blue);font-size:13px;margin-bottom:10px;}
+.qtext{font-size:19px;line-height:1.45;margin-bottom:26px;}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:4px;margin-bottom:10px;cursor:pointer;background:#fff;}
+.opt:hover{border-color:var(--blue);}
+.opt.sel{border-color:var(--blue);background:var(--blue-dim);}
+.opt input{margin-top:3px;}
+.navrow{display:flex;justify-content:space-between;margin-top:28px;}
+.overlay{position:fixed;inset:0;background:rgba(18,22,28,.85);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.overlay .card{background:#fff;padding:28px;border-radius:6px;max-width:420px;border-top:4px solid var(--red);width:100%;}
+.overlay .card.strike-2{border-top-color:var(--amber);}
+.overlay .card.dialog-card{border-top-color:var(--blue);}
+.overlay h3{margin:0 0 10px;}
+.overlay p{color:var(--muted);line-height:1.5;margin:0 0 18px;}
+
+/* admin */
+.adminwrap{display:flex;min-height:calc(100% - 53px);}
+.side{width:190px;border-right:1px solid var(--line);padding:20px 0;background:#fff;flex-shrink:0;}
+.side button{width:100%;text-align:left;background:none;border:none;padding:10px 24px;font-weight:500;color:var(--muted);}
+.side button.active{color:var(--ink);border-left:3px solid var(--blue);background:var(--blue-dim);}
+.main{flex:1;padding:32px;overflow:auto;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);}
+th{color:var(--muted);font-weight:600;font-size:12px;}
+td mono{font-family:ui-monospace,monospace;}
+.qcard{border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:12px;background:#fff;}
+.qcard .qh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.qcard .ans{font-size:13px;color:var(--green);margin-top:6px;}
+.tag{font-family:ui-monospace,monospace;font-size:11px;padding:2px 7px;border-radius:3px;}
+.tag.ok{background:#E4F3EC;color:var(--green);}
+.tag.flag{background:#FBEAE6;color:var(--red);}
+.tag.info{background:var(--blue-dim);color:var(--blue);}
+.empty{color:var(--muted);font-style:italic;padding:24px 0;}
+
+/* in-app toast */
+#toast-box{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:11px 20px;border-radius:4px;
+  font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.18);
+  pointer-events:none;transition:opacity 0.2s ease, transform 0.2s ease;
+  opacity:0;display:none;
+}
+#toast-box.show{opacity:1;display:block;}
+
+@media(max-width:640px){.adminwrap{flex-direction:column;}.side{width:100%;display:flex;overflow-x:auto;padding:8px;border-right:none;border-bottom:1px solid var(--line);}.side button{width:auto;white-space:nowrap;}}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="toast-box"></div>
+
+<script>
+// JSONBin Credentials
+const BIN_ID = "6ab66f19ac6210605af43ad8";
+const MASTER_KEY = "$2a$10$6BJcgk6QXybEmHVKMdyp6OZ09IcCm6Rak6Twr9sK19unngkxXoE62";
+
+// Default Question Bank
+const DEFAULT_QUESTIONS = [
+  {
+    id: 1,
+    text: "What does REST stand for?",
+    opts: [
+      "Representational State Transfer",
+      "Remote Execution Service Toolkit",
+      "Reliable Endpoint Status Transfer",
+      "Recursive State Transformation"
+    ],
+    correct: 0
+  },
+  {
+    id: 2,
+    text: "What is the HTTP status code for \"Not Found\"?",
+    opts: ["200", "403", "404", "500"],
+    correct: 2
+  },
+  {
+    id: 3,
+    text: "In JavaScript, what is a closure?",
+    opts: [
+      "A function bundled together with references to its surrounding lexical environment",
+      "A method to close active database connections automatically",
+      "An HTML closing tag validator in the browser",
+      "A syntax error caused by unclosed parentheses in loops"
+    ],
+    correct: 0
+  },
+  {
+    id: 4,
+    text: "Which data structure operates on a First-In-First-Out (FIFO) principle?",
+    opts: ["Stack", "Queue", "Binary Search Tree", "Hash Table"],
+    correct: 1
+  },
+  {
+    id: 5,
+    text: "In Git, which command is used to combine changes from one branch into another?",
+    opts: ["git push", "git merge", "git clone", "git commit"],
+    correct: 1
+  },
+  {
+    id: 6,
+    text: "What does CSS stand for?",
+    opts: [
+      "Cascading Style Sheets",
+      "Computer Screen Styles",
+      "Creative Styling Syntax",
+      "Centralized Sheet Structure"
+    ],
+    correct: 0
+  },
+  {
+    id: 7,
+    text: "Which SQL clause is used to filter records returned by a query?",
+    opts: ["ORDER BY", "GROUP BY", "WHERE", "LIMIT"],
+    correct: 2
+  },
+  {
+    id: 8,
+    text: "What is the average time complexity of searching by key in a standard Hash Map?",
+    opts: ["O(n)", "O(log n)", "O(1)", "O(n^2)"],
+    correct: 2
+  },
+  {
+    id: 9,
+    text: "In React, which hook is primarily used to perform side effects in functional components?",
+    opts: ["useState", "useEffect", "useMemo", "useReducer"],
+    correct: 1
+  },
+  {
+    id: 10,
+    text: "What does JSON stand for?",
+    opts: [
+      "JavaScript Object Notation",
+      "Java Standard Object Network",
+      "Joined Script Operating Node",
+      "JavaScript Output Name"
+    ],
+    correct: 0
+  },
+  {
+    id: 11,
+    text: "Which protocol is typically used to encrypt web traffic between a browser and a server?",
+    opts: ["FTP", "HTTPS / TLS", "SSH", "Telnet"],
+    correct: 1
+  },
+  {
+    id: 12,
+    text: "In database transactions, what does the \"A\" in ACID stand for?",
+    opts: ["Atomicity", "Asynchrony", "Availability", "Authentication"],
+    correct: 0
+  }
+];
+
+// BroadcastChannel for instant real-time synchronization across same-browser tabs
+const syncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('itq_exam_sync') : null;
+
+function broadcastSync(type, payload) {
+  if (syncChannel) {
+    try {
+      syncChannel.postMessage({ type, payload, timestamp: Date.now() });
+    } catch(err) {
+      console.warn("Broadcast error:", err);
+    }
+  }
+}
+
+// In-App Toast Notification
+let toastTimer = null;
+function showToast(msg, duration = 3000) {
+  const el = document.getElementById('toast-box');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+  }, duration);
+}
+
+// Confirmation Dialog State
+let dialogState = null;
+function openConfirmDialog(title, message, onConfirm) {
+  dialogState = { title, message, onConfirm };
+  render();
+}
+function closeConfirmDialog(confirmed) {
+  if (confirmed && dialogState && dialogState.onConfirm) {
+    dialogState.onConfirm();
+  }
+  dialogState = null;
+  render();
+}
+
+// Database Layer
+const DB = {
+  get q(){ 
+    const stored = localStorage.getItem('itq_questions');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch(e){}
+    }
+    return DEFAULT_QUESTIONS; 
+  },
+  set q(v){ 
+    localStorage.setItem('itq_questions', JSON.stringify(v));
+    broadcastSync('QUESTIONS', v);
+    syncQuestionsToServer(v);
+    saveToJSONBin();
+  },
+  get cands(){ 
+    const stored = localStorage.getItem('itq_candidates');
+    return stored ? JSON.parse(stored) : []; 
+  },
+  set cands(v){ 
+    localStorage.setItem('itq_candidates', JSON.stringify(v));
+    broadcastSync('CANDIDATES', v);
+  },
+  get pw(){ 
+    return localStorage.getItem('itq_pw') || 'admin123'; 
+  },
+  set pw(v){ 
+    localStorage.setItem('itq_pw', v); 
+    syncPasswordToServer(v);
+  },
+  get settings(){ 
+    const stored = localStorage.getItem('itq_settings');
+    if (stored) {
+      try {
+        const s = JSON.parse(stored);
+        if (s && typeof s === 'object') {
+          return {
+            timeLimitMin: Number(s.timeLimitMin) || 30,
+            questionCount: Number(s.questionCount) || 10,
+            maxSwitches: Number(s.maxSwitches) || 3,
+            passingScore: Number(s.passingScore) || 70
+          };
+        }
+      } catch(e){}
+    }
+    return { timeLimitMin: 30, questionCount: 10, maxSwitches: 3, passingScore: 70 }; 
+  },
+  set settings(v){ 
+    localStorage.setItem('itq_settings', JSON.stringify(v));
+    broadcastSync('SETTINGS', v);
+    syncSettingsToServer(v);
+    saveToJSONBin();
+  }
+};
+
+// Apply Incoming Settings into live UI and active exam sessions
+function applyIncomingSettings(newSettings) {
+  if (!newSettings || typeof newSettings !== 'object') return;
+  const currentSettings = DB.settings;
+
+  // Prevent unnecessary DOM re-renders if settings have not actually changed
+  const isChanged = JSON.stringify(currentSettings) !== JSON.stringify(newSettings);
+  if (!isChanged) return;
+
+  const oldTime = currentSettings.timeLimitMin;
+  const newTime = Number(newSettings.timeLimitMin) || 30;
+
+  localStorage.setItem('itq_settings', JSON.stringify(newSettings));
+
+  // If candidate is actively taking the test, dynamically adjust timer
+  if (state.view === 'test' && state.test && !state.test.ended) {
+    if (newTime !== oldTime) {
+      const timeDiffMs = (newTime - oldTime) * 60000;
+      state.test.deadline = state.test.deadline + timeDiffMs;
+      if (state.test.deadline < Date.now() + 5000) {
+        state.test.deadline = Date.now() + 5000;
+      }
+      showToast(`Exam time limit adjusted by administrator to ${newTime} minutes`);
+    }
+    if (newSettings.maxSwitches) {
+      state.test.maxSwitches = Number(newSettings.maxSwitches);
+    }
+    render();
+  } else if (state.view === 'landing') {
+    render();
+  } else if (state.view === 'name') {
+    // Keep user's input intact and only update the description text
+    const cnameInput = document.getElementById('cname');
+    if (cnameInput) {
+      state.candidateName = cnameInput.value;
+    }
+    const lede = document.querySelector('.wrap .lede');
+    const total = DB.q.length;
+    const count = Math.min(newSettings.questionCount || 10, total || 10);
+    if (lede) {
+      lede.textContent = `This is how you'll be identified in the results list. Your test is configured for ${count} question${count===1?'':'s'} with a ${newSettings.timeLimitMin}-minute time limit.`;
+    }
+  } else if (state.view === 'admin' && state.adminTab === 'settings') {
+    // If admin is in settings and not currently typing, update form fields
+    const active = document.activeElement;
+    const isTyping = active && (active.id === 'timeLimit' || active.id === 'qCount' || active.id === 'maxSwitches' || active.id === 'passingScore');
+    if (!isTyping) {
+      render();
+    }
+  }
+}
+
+// Server Communication Functions
+async function syncSettingsToServer(settings) {
+  try {
+    await fetch('/api/exam-data/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings)
+    });
+  } catch(err) {
+    console.warn("Local server sync not available (running standalone)");
+  }
+}
+
+async function syncQuestionsToServer(questions) {
+  try {
+    await fetch('/api/exam-data/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ questions })
+    });
+  } catch(err) {
+    console.warn("Local server sync not available (running standalone)");
+  }
+}
+
+async function syncPasswordToServer(pw) {
+  try {
+    await fetch('/api/exam-data/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pw })
+    });
+  } catch(err) {}
+}
+
+async function fetchServerData(forceRender = false) {
+  try {
+    const res = await fetch('/api/exam-data', { cache: 'no-store' });
+    const ctype = res.headers.get('content-type') || '';
+    if (res.ok && ctype.includes('application/json')) {
+      const data = await res.json();
+      if (data.settings) {
+        applyIncomingSettings(data.settings);
+      }
+      if (Array.isArray(data.questions) && data.questions.length > 0) {
+        localStorage.setItem('itq_questions', JSON.stringify(data.questions));
+      }
+      if (Array.isArray(data.candidates)) {
+        localStorage.setItem('itq_candidates', JSON.stringify(data.candidates));
+      }
+      if (data.pw) {
+        localStorage.setItem('itq_pw', data.pw);
+      }
+      if (forceRender) render();
+      return true;
+    }
+  } catch(err) {
+    // Standalone fallback
+  }
+  return false;
+}
+
+// JSONBin Cloud Backup
+async function saveToJSONBin() {
+  try {
+    const payload = {
+      questions: DB.q,
+      settings: DB.settings,
+      candidates: DB.cands
+    };
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': MASTER_KEY
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch(err) {
+    console.warn("JSONBin update failed or unavailable:", err);
+  }
+}
+
+async function loadFromJSONBin() {
+  try {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?nocache=${Date.now()}`, {
+      method: 'GET',
+      headers: { 'X-Master-Key': MASTER_KEY }
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      const record = result.record || {};
+      const questionsData = record.questions || (Array.isArray(record) ? record : null);
+      if (Array.isArray(questionsData) && questionsData.length > 0) {
+        localStorage.setItem('itq_questions', JSON.stringify(questionsData));
+      }
+      if (record.settings) {
+        applyIncomingSettings(record.settings);
+      }
+      if (Array.isArray(record.candidates)) {
+        localStorage.setItem('itq_candidates', JSON.stringify(record.candidates));
+      }
+    }
+  } catch (error) {
+    console.warn("JSONBin fetch skipped or failed.");
+  }
+}
+
+// Server-Sent Events (SSE) for Real-Time Multi-Device Synchronization
+let sseSource = null;
+function initSSE() {
+  if (typeof EventSource === 'undefined') return;
+  try {
+    if (sseSource) {
+      try { sseSource.close(); } catch(e){}
+    }
+    sseSource = new EventSource('/api/exam-data/stream');
+    sseSource.addEventListener('init', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.settings) applyIncomingSettings(data.settings);
+        if (Array.isArray(data.questions) && data.questions.length > 0) {
+          localStorage.setItem('itq_questions', JSON.stringify(data.questions));
+        }
+        if (Array.isArray(data.candidates)) {
+          localStorage.setItem('itq_candidates', JSON.stringify(data.candidates));
+        }
+        if (data.pw) localStorage.setItem('itq_pw', data.pw);
+        if (state.view !== 'name' && state.view !== 'test') {
+          render();
+        }
+      } catch(err){}
+    });
+    sseSource.addEventListener('settings', (e) => {
+      try {
+        const s = JSON.parse(e.data);
+        applyIncomingSettings(s);
+      } catch(err){}
+    });
+    sseSource.addEventListener('questions', (e) => {
+      try {
+        const q = JSON.parse(e.data);
+        localStorage.setItem('itq_questions', JSON.stringify(q));
+        if (state.view === 'admin' && state.adminTab === 'kb') render();
+      } catch(err){}
+    });
+    sseSource.addEventListener('candidates', (e) => {
+      try {
+        const c = JSON.parse(e.data);
+        localStorage.setItem('itq_candidates', JSON.stringify(c));
+        if (state.view === 'admin' && state.adminTab === 'cands') render();
+      } catch(err){}
+    });
+    sseSource.onerror = () => {
+      // Reconnect after brief pause if connection drops
+      setTimeout(() => {
+        if (!sseSource || sseSource.readyState === EventSource.CLOSED) {
+          initSSE();
+        }
+      }, 3000);
+    };
+  } catch(e){}
+}
+
+// Cross-tab synchronization handlers
+if (syncChannel) {
+  syncChannel.onmessage = (event) => {
+    const { type, payload } = event.data || {};
+    if (type === 'SETTINGS') {
+      applyIncomingSettings(payload);
+    } else if (type === 'QUESTIONS') {
+      localStorage.setItem('itq_questions', JSON.stringify(payload));
+      if (state.view === 'admin' && state.adminTab === 'kb') render();
+    } else if (type === 'CANDIDATES') {
+      localStorage.setItem('itq_candidates', JSON.stringify(payload));
+      if (state.view === 'admin' && state.adminTab === 'cands') render();
+    }
+  };
+}
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'itq_settings' && e.newValue) {
+    try { applyIncomingSettings(JSON.parse(e.newValue)); } catch(err){}
+  } else if (e.key === 'itq_questions' && e.newValue) {
+    if (state.view === 'admin' && state.adminTab === 'kb') render();
+  } else if (e.key === 'itq_candidates' && e.newValue) {
+    if (state.view === 'admin' && state.adminTab === 'cands') render();
+  }
+});
+
+if(window.pdfjsLib){ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }
+
+let state = { view:'landing', candidateName:'', test:null, adminTab:'kb', editingQ:null, staged:null, lastStatus:null };
+let testInterval=null;
+
+function fmtTime(ms){ 
+  if(ms<0) ms=0; 
+  const s=Math.floor(ms/1000); 
+  const m=Math.floor(s/60); 
+  const sec=s%60; 
+  return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); 
+}
+
+function render(){
+  const app=document.getElementById('app');
+  let content = '';
+  if(state.view==='landing') content = landing();
+  else if(state.view==='name') content = nameEntry();
+  else if(state.view==='test') content = testView();
+  else if(state.view==='submitted') content = submittedView();
+  else if(state.view==='adminlogin') content = adminLogin();
+  else if(state.view==='admin') content = adminView();
+
+  if (dialogState) {
+    content += `
+    <div class="overlay">
+      <div class="card dialog-card">
+        <h3>${escapeHtml(dialogState.title)}</h3>
+        <p>${escapeHtml(dialogState.message)}</p>
+        <div class="row">
+          <button onclick="closeConfirmDialog(true)">Confirm</button>
+          <button class="secondary" onclick="closeConfirmDialog(false)">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  app.innerHTML = content;
+  wireEvents();
+}
+
+function bar(sub){ return `<div class="bar"><div class="brand">Interview Test</div><div class="sub">${sub}</div></div>`; }
+
+function landing(){
+  const s = DB.settings;
+  const total = DB.q.length;
+  const count = Math.min(s.questionCount || 10, total || 10);
+  return bar('candidate portal') + `
+  <div class="wrap">
+    <h1>Ready when you are.</h1>
+    <p class="lede">Enter your name to begin the technical assessment (${count} question${count===1?'':'s'} · ${s.timeLimitMin} minutes). Once started, stay on this tab — switching away is logged.</p>
+    <button onclick="go('name')">Start test</button>
+    <hr>
+    <button class="link" onclick="go('adminlogin')">Admin sign in</button>
+  </div>`;
+}
+
+function nameEntry(){
+  const s = DB.settings;
+  const total = DB.q.length;
+  const count = Math.min(s.questionCount || 10, total || 10);
+  const currentVal = state.candidateName || '';
+  return bar('candidate portal') + `
+  <div class="wrap">
+    <h2>Your name</h2>
+    <p class="lede">This is how you'll be identified in the results list. Your test is configured for ${count} question${count===1?'':'s'} with a ${s.timeLimitMin}-minute time limit.</p>
+    <div class="field"><input type="text" id="cname" placeholder="Full name" value="${escapeAttr(currentVal)}" oninput="state.candidateName=this.value" autofocus></div>
+    <div class="row"><button id="beginBtn">Begin test</button><button class="secondary" onclick="go('landing')">Back</button></div>
+  </div>`;
+}
+
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function shuffleQuestionOptions(q){
+  const order=shuffleArray(q.opts.map((_,i)=>i));
+  return { id:q.id, text:q.text, opts:order.map(i=>q.opts[i]), correct:order.indexOf(q.correct) };
+}
+
+async function startTest(){
+  const inputEl = document.getElementById('cname');
+  const name = (inputEl ? inputEl.value : (state.candidateName || '')).trim();
+  if(!name) {
+    if (inputEl) inputEl.focus();
+    return;
+  }
+  state.candidateName = name;
+
+  // Sync latest exam settings and questions before starting test
+  await fetchServerData(false);
+
+  const all=DB.q;
+  if(all.length===0){ 
+    showToast('No questions are set up yet. Ask the interviewer to add some to the knowledge base.'); 
+    return; 
+  }
+  const settings=DB.settings;
+  const pool=[...all].sort(()=>Math.random()-0.5);
+  const count=Math.min(settings.questionCount||pool.length, pool.length);
+  const chosen=pool.slice(0,count).map(shuffleQuestionOptions);
+  
+  state.candidateName=name;
+  const candidateId = Date.now();
+  state.test={ 
+    candidateId,
+    questions:chosen, 
+    qIndex:0, 
+    answers:{}, 
+    switches:0, 
+    start:Date.now(),
+    deadline: Date.now() + (settings.timeLimitMin||30)*60000, 
+    maxSwitches: settings.maxSwitches || 3,
+    passingScore: settings.passingScore || 70,
+    warning:null, 
+    ended:false 
+  };
+
+  // Record 'started' status entry in candidate list for real-time admin monitoring
+  const startedRecord = {
+    id: candidateId,
+    name: name,
+    date: new Date().toISOString(),
+    score: 0,
+    total: chosen.length,
+    switches: 0,
+    status: 'started'
+  };
+  const list = DB.cands.filter(c => c.id !== candidateId);
+  list.unshift(startedRecord);
+  DB.cands = list;
+
+  // Immediately notify server and sync across network
+  try {
+    fetch('/api/exam-data/candidates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(startedRecord)
+    });
+  } catch(e){}
+
+  state.view='test';
+  render();
+  attachGuard();
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(testInterval);
+  testInterval=setInterval(()=>{
+    if(!state.test || state.test.ended){ clearInterval(testInterval); return; }
+    if(state.test.deadline - Date.now() <= 0){ submitTest(false, true); return; }
+    render();
+  },1000);
+}
+
+function testView(){
+  const t=state.test, questions=t.questions, q=questions[t.qIndex];
+  const n=questions.length;
+  const maxSwitches = t.maxSwitches || 3;
+  const opts=q.opts.map((o,i)=>`
+    <label class="opt ${t.answers[q.id]===i?'sel':''}">
+      <input type="radio" name="opt" value="${i}" ${t.answers[q.id]===i?'checked':''} onchange="selectAnswer(${q.id},${i})">
+      <span>${escapeHtml(o)}</span>
+    </label>`).join('');
+  const warning = t.warning ? `
+    <div class="overlay"><div class="card ${t.warning>=maxSwitches-1?'strike-2':''}">
+      <h3>Tab switch detected</h3>
+      <p>Leaving this tab during the test is recorded. This is strike ${t.warning} of ${maxSwitches}. Reaching ${maxSwitches} strikes will end the test automatically and flag it for review.</p>
+      <button onclick="dismissWarning()">Continue test</button>
+    </div></div>` : '';
+  return `
+  <div class="testbar">
+    <div class="name">${escapeHtml(state.candidateName)}</div>
+    <div class="prog"><mono>Q${t.qIndex+1}/${n} · ${fmtTime(t.deadline-Date.now())} left · ${t.switches} tab switch${t.switches===1?'':'es'} logged</mono></div>
+  </div>
+  <div class="qwrap">
+    <div class="qnum">QUESTION ${t.qIndex+1}</div>
+    <div class="qtext">${escapeHtml(q.text)}</div>
+    ${opts}
+    <div class="navrow">
+      <button class="secondary" ${t.qIndex===0?'disabled':''} onclick="prevQ()">Previous</button>
+      ${t.qIndex===n-1 ? `<button onclick="submitTest(false)">Submit test</button>` : `<button onclick="nextQ()">Next</button>`}
+    </div>
+  </div>
+  ${warning}`;
+}
+
+function selectAnswer(qid,idx){ state.test.answers[qid]=idx; render(); }
+function nextQ(){ state.test.qIndex++; render(); }
+function prevQ(){ state.test.qIndex--; render(); }
+
+function attachGuard(){
+  document.addEventListener('visibilitychange', onGuardTrigger);
+  window.addEventListener('blur', onGuardTrigger);
+}
+function detachGuard(){
+  document.removeEventListener('visibilitychange', onGuardTrigger);
+  window.removeEventListener('blur', onGuardTrigger);
+}
+function onGuardTrigger(){
+  if(!state.test || state.test.ended) return;
+  if(document.visibilityState==='hidden' || document.hasFocus()===false){
+    state.test.switches++;
+    const maxSw = state.test.maxSwitches || 3;
+    state.test.warning = state.test.switches;
+    if(state.test.switches >= maxSw){
+      submitTest(true);
+      return;
+    }
+    render();
+  }
+}
+function dismissWarning(){ state.test.warning=null; render(); }
+
+async function submitTest(flagged, timedOut){
+  const t=state.test, questions=t.questions;
+  let score=0;
+  questions.forEach(q=>{ if(t.answers[q.id]===q.correct) score++; });
+  t.ended=true;
+  detachGuard();
+  clearInterval(testInterval);
+  const status = flagged ? 'flagged' : (timedOut ? 'timed-out' : 'completed');
+  const recordId = (t && t.candidateId) ? t.candidateId : Date.now();
+  const record={
+    id: recordId,
+    name: state.candidateName,
+    date: new Date().toISOString(),
+    score, 
+    total: questions.length,
+    switches: t.switches,
+    status
+  };
+  const list = DB.cands.filter(c => c.id !== recordId);
+  list.unshift(record); 
+  DB.cands=list;
+
+  // Send to server
+  try {
+    await fetch('/api/exam-data/candidates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    });
+  } catch(e){}
+
+  state.lastStatus=status;
+  state.view='submitted';
+  render();
+}
+
+function submittedView(){
+  const s=state.lastStatus;
+  const heading = s==='flagged' ? 'Test ended' : s==='timed-out' ? "Time's up" : 'Test submitted';
+  const msg = s==='flagged'
+    ? 'This test was ended automatically after repeated tab switching and has been flagged for the interviewer.'
+    : s==='timed-out'
+    ? 'Your time ran out, so the test was submitted automatically with your current answers.'
+    : 'Thanks, ' + escapeHtml(state.candidateName) + '. Your responses have been recorded. The interviewer will follow up with next steps.';
+  return bar('candidate portal') + `
+  <div class="wrap">
+    <h1>${heading}</h1>
+    <p class="lede">${msg}</p>
+    <button class="secondary" onclick="resetToLanding()">Done</button>
+  </div>`;
+}
+function resetToLanding(){ 
+  clearInterval(testInterval); 
+  state={view:'landing', candidateName:'', test:null, adminTab:'kb', editingQ:null, staged:null, lastStatus:null}; 
+  render(); 
+}
+
+function adminLogin(){
+  return bar('admin') + `
+  <div class="wrap">
+    <h2>Admin sign in</h2>
+    <div class="field"><input type="password" id="apw" placeholder="Password"></div>
+    <div class="row"><button id="loginBtn">Sign in</button><button class="secondary" onclick="go('landing')">Back</button></div>
+  </div>`;
+}
+function tryLogin(){
+  const v=document.getElementById('apw').value;
+  if(v===DB.pw){ 
+    state.view='admin'; 
+    render(); 
+  } else {
+    showToast('Incorrect password.');
+  }
+}
+
+function adminView(){
+  return bar('admin') + `
+  <div class="adminwrap">
+    <div class="side">
+      <button class="${state.adminTab==='kb'?'active':''}" onclick="setAdminTab('kb')">Knowledge base</button>
+      <button class="${state.adminTab==='cands'?'active':''}" onclick="setAdminTab('cands')">Candidates & scores</button>
+      <button class="${state.adminTab==='settings'?'active':''}" onclick="setAdminTab('settings')">Settings</button>
+      <hr style="margin:12px 20px;">
+      <button onclick="go('landing')">Go Back</button>
+    </div>
+    <div class="main">${state.adminTab==='kb'?kbTab():state.adminTab==='cands'?candsTab():settingsTab()}</div>
+  </div>`;
+}
+function setAdminTab(t){ state.adminTab=t; state.editingQ=null; render(); }
+
+function kbTab(){
+  const qs=DB.q;
+  const editing = state.editingQ;
+  const form = editing ? `
+    <div class="qcard">
+      <div class="field"><label>Question</label><input type="text" id="qtext" value="${escapeAttr(editing.text||'')}"></div>
+      ${[0,1,2,3].map(i=>`<div class="field"><label>Option ${i+1}${editing.correct===i?' (correct)':''}</label>
+        <div class="row"><input type="text" id="opt${i}" value="${escapeAttr((editing.opts&&editing.opts[i])||'')}" style="flex:1">
+        <label style="display:flex;align-items:center;gap:6px;"><input type="radio" name="correctopt" value="${i}" ${editing.correct===i?'checked':''}> correct</label></div></div>`).join('')}
+      <div class="row"><button onclick="saveQuestion()">Save question</button><button class="secondary" onclick="state.editingQ=null;render()">Cancel</button></div>
+    </div>` : '';
+  const list = qs.length===0 ? `<div class="empty">No questions yet.</div>` : qs.map(q=>`
+    <div class="qcard">
+      <div class="qh">
+        <div>
+          <div>${escapeHtml(q.text)}</div>
+          <div class="ans">Correct: ${escapeHtml(q.opts[q.correct])}</div>
+        </div>
+        <div class="row"><button class="secondary" onclick="editQuestion(${q.id})">Edit</button><button class="secondary" onclick="deleteQuestionPrompt(${q.id})">Delete</button></div>
+      </div>
+    </div>`).join('');
+  return `<h2>Knowledge base</h2><p class="lede">${qs.length} question${qs.length===1?'':'s'} in the bank.</p>
+    ${!editing && !state.staged ? `
+    <div class="qcard" style="border-style:dashed;">
+      <div style="font-weight:600;margin-bottom:6px;">Import from PDF</div>
+      <p class="lede" style="margin-bottom:12px;">Upload a PDF with numbered questions, options A–D, and an answer line (e.g. "Answer: B"). Detected questions land in a review list so you can fix or remove any before adding them.</p>
+      <input type="file" id="pdfInput" accept="application/pdf">
+      <div id="parseStatus" class="lede" style="margin-top:8px;"></div>
+    </div>
+    <button onclick="addQuestion()">Add question manually</button><hr>` : ''}
+    ${stagedSection()}
+    ${form}${list}`;
+}
+
+function stagedSection(){
+  if(!state.staged || state.staged.length===0) return '';
+  const items = state.staged.map((q,i)=>`
+    <div class="qcard">
+      <div class="field"><label>Question</label><input type="text" value="${escapeAttr(q.text)}" onchange="updateStaged(${i},'text',this.value)"></div>
+      ${[0,1,2,3].map(j=>`<div class="field"><label>Option ${j+1}</label>
+        <div class="row"><input type="text" value="${escapeAttr(q.opts[j]||'')}" style="flex:1" onchange="updateStagedOpt(${i},${j},this.value)">
+        <label style="display:flex;align-items:center;gap:6px;"><input type="radio" name="stagedCorrect${i}" ${q.correct===j?'checked':''} onchange="updateStaged(${i},'correct',${j})"> correct</label></div></div>`).join('')}
+      <button class="link" onclick="removeStaged(${i})">Remove this one</button>
+    </div>`).join('');
+  return `<h2>Review imported questions</h2>
+    <p class="lede">${state.staged.length} question${state.staged.length===1?'':'s'} detected from the PDF. Edit anything that parsed oddly, remove any that don't look right, then add the rest.</p>
+    ${items}
+    <div class="row"><button onclick="commitStaged()">Add ${state.staged.length} question${state.staged.length===1?'':'s'} to knowledge base</button><button class="secondary" onclick="state.staged=null;render()">Discard all</button></div><hr>`;
+}
+function updateStaged(i,field,val){ state.staged[i][field]=val; render(); }
+function updateStagedOpt(i,j,val){ state.staged[i].opts[j]=val; render(); }
+function removeStaged(i){ state.staged.splice(i,1); render(); }
+function commitStaged(){
+  const valid=state.staged.filter(q=>q.text.trim() && q.opts.every(o=>(o||'').trim()));
+  if(valid.length===0){ 
+    showToast('Each question needs its text and all four options filled in.'); 
+    return; 
+  }
+  const qs=DB.q;
+  valid.forEach(q=>qs.push({id:Date.now()+Math.random(), text:q.text.trim(), opts:q.opts.map(o=>o.trim()), correct:q.correct||0}));
+  DB.q=qs; 
+  state.staged=null; 
+  showToast(`Added ${valid.length} question${valid.length===1?'':'s'} to knowledge base.`);
+  render();
+}
+
+async function handlePdfFile(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const statusEl=document.getElementById('parseStatus');
+  if(statusEl) statusEl.textContent='Reading PDF…';
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      text += content.items.map(it=>it.str).join(' ') + '\n';
+    }
+    const parsed=parseQuestionsFromText(text);
+    if(parsed.length===0){
+      showToast('Could not detect questions. Requires format: 1. Question, A) opt, B) opt, Answer: B');
+      if(statusEl) statusEl.textContent='';
+      return;
+    }
+    state.staged=parsed;
+    if(statusEl) statusEl.textContent=`${parsed.length} questions parsed.`;
+    render();
+  }catch(err){
+    showToast('Could not read this PDF: '+err.message);
+    if(statusEl) statusEl.textContent='';
+  }
+}
+
+function parseQuestionsFromText(text){
+  text=text.replace(/\r/g,'');
+  text=text.replace(/(?:^|\s)(\d{1,3})\.\s+/g, '\n##Q##$1. ');
+  text=text.replace(/(?:^|\s)([A-D])[\)\.]\s+/g, '\n##O##$1) ');
+  text=text.replace(/\b(Answer|Ans|Correct)\s*[:\-]?\s*/gi, '\n##A##');
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const qs=[]; let cur=null;
+  lines.forEach(line=>{
+    if(line.startsWith('##Q##')){
+      if(cur && cur.text) qs.push(cur);
+      cur={text: line.replace(/^##Q##\d+\.\s*/,'').trim(), opts:[], correct:0, _letters:[]};
+    } else if(line.startsWith('##O##') && cur){
+      const m=line.match(/^##O##([A-D])\)\s*(.*)$/);
+      if(m){ cur.opts.push(m[2].trim()); cur._letters.push(m[1]); }
+    } else if(line.startsWith('##A##') && cur){
+      const ans=line.replace('##A##','').trim();
+      const letter=(ans[0]||'').toUpperCase();
+      const idx=cur._letters.indexOf(letter);
+      cur.correct = idx>=0 ? idx : 0;
+    } else if(cur && cur.opts.length===0){
+      cur.text += ' ' + line;
+    }
+  });
+  if(cur && cur.text) qs.push(cur);
+  return qs.filter(q=>q.opts.length>=2).map(q=>({
+    text:q.text, opts:[0,1,2,3].map(i=>q.opts[i]||''), correct:q.correct
+  }));
+}
+
+function addQuestion(){ state.editingQ={text:'',opts:['','','',''],correct:0,_new:true}; render(); }
+function editQuestion(id){ state.editingQ=JSON.parse(JSON.stringify(DB.q.find(q=>q.id===id))); render(); }
+
+function saveQuestion(){
+  const text=document.getElementById('qtext').value.trim();
+  const opts=[0,1,2,3].map(i=>document.getElementById('opt'+i).value.trim());
+  const correctEl=document.querySelector('input[name=correctopt]:checked');
+  if(!text||opts.some(o=>!o)||!correctEl){ 
+    showToast('Fill in the question, all four options, and mark the correct one.'); 
+    return; 
+  }
+  const correct=parseInt(correctEl.value, 10);
+  let qs=DB.q;
+  if(state.editingQ._new){
+    qs.push({id:Date.now(), text, opts, correct});
+  } else {
+    const idx=qs.findIndex(q=>q.id===state.editingQ.id);
+    if(idx>=0) qs[idx]={id:state.editingQ.id, text, opts, correct};
+  }
+  DB.q=qs; 
+  state.editingQ=null; 
+  showToast('Question saved.');
+  render();
+}
+
+function deleteQuestionPrompt(id){
+  openConfirmDialog('Delete question', 'Are you sure you want to delete this question from the bank?', () => {
+    DB.q = DB.q.filter(q=>q.id!==id);
+    showToast('Question deleted.');
+  });
+}
+
+function candsTab(){
+  const list=DB.cands;
+  const passingScore = (DB.settings && DB.settings.passingScore) || 70;
+  const rows = list.length===0 ? `<tr><td colspan="6" class="empty">No candidates have tested yet.</td></tr>` :
+    list.map(c=>{
+      const isStarted = c.status === 'started';
+      const pct = c.total > 0 ? Math.round((c.score / c.total) * 100) : 0;
+      const isPass = c.status === 'completed' && pct >= passingScore;
+      const tagClass = isStarted ? 'info' : (c.status === 'flagged' ? 'flag' : (isPass ? 'ok' : 'flag'));
+      const statusText = isStarted ? 'started' : (c.status === 'flagged' ? 'flagged' : c.status === 'timed-out' ? 'timed-out' : (isPass ? 'passed' : 'failed'));
+      const scoreDisplay = isStarted ? '<span style="color:var(--muted);font-size:12px;">in progress...</span>' : `<mono>${c.score}/${c.total} (${pct}%)</mono>`;
+      return `<tr>
+        <td><strong>${escapeHtml(c.name)}</strong></td>
+        <td><mono>${new Date(c.date).toLocaleString()}</mono></td>
+        <td>${scoreDisplay}</td>
+        <td><mono>${c.switches}</mono></td>
+        <td><span class="tag ${tagClass}">${statusText}</span></td>
+        <td><button class="link" onclick="deleteCandPrompt(${c.id})">Remove</button></td>
+      </tr>`;
+    }).join('');
+  return `<h2>Candidates & scores</h2><p class="lede">${list.length} test${list.length===1?'':'s'} recorded.</p>
+    <table><thead><tr><th>Name</th><th>Date</th><th>Score</th><th>Tab switches</th><th>Status</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+
+function deleteCandPrompt(id){
+  openConfirmDialog('Remove candidate', 'Are you sure you want to remove this candidate test record?', async () => {
+    DB.cands = DB.cands.filter(c=>c.id!==id);
+    try {
+      await fetch(`/api/exam-data/candidates/${id}`, { method: 'DELETE' });
+    } catch(e){}
+    showToast('Record removed.');
+  });
+}
+
+function settingsTab(){
+  const s=DB.settings, total=DB.q.length;
+  return `<h2>Test configuration</h2>
+    <p class="lede">Controls what each candidate gets when they start a test. Settings synchronize to all candidate screens in real-time.</p>
+    <div class="field"><label>Time limit (minutes)</label><input type="text" id="timeLimit" value="${s.timeLimitMin}"></div>
+    <div class="field"><label>Number of questions per test</label><input type="text" id="qCount" value="${s.questionCount}"></div>
+    <div class="field"><label>Allowed tab switches before auto-submit</label><input type="text" id="maxSwitches" value="${s.maxSwitches || 3}"></div>
+    <div class="field"><label>Passing score percentage (%)</label><input type="text" id="passingScore" value="${s.passingScore || 70}"></div>
+    <p class="lede" style="margin-top:-8px;">${total} question${total===1?'':'s'} currently in the knowledge base. Each candidate gets a random selection of this size; if it's larger than the bank, everything is used.</p>
+    <button onclick="saveTestSettings()">Save test settings</button>
+    <hr>
+    <h2>Admin password</h2>
+    <div class="field"><label>New password</label><input type="password" id="newpw" placeholder="New password"></div>
+    <button onclick="changePw()">Update password</button>
+    <hr>
+    <h2>Export project</h2>
+    <p class="lede">Download the complete project zip to run locally in VS Code or deploy to your own server.</p>
+    <a href="/download-zip" download="interview-test-platform.zip" style="text-decoration:none;"><button type="button">Download project (.zip)</button></a>`;
+}
+
+async function saveTestSettings(){
+  const t=parseInt(document.getElementById('timeLimit').value,10);
+  const c=parseInt(document.getElementById('qCount').value,10);
+  const maxSwEl=document.getElementById('maxSwitches');
+  const passEl=document.getElementById('passingScore');
+  const ms = maxSwEl ? parseInt(maxSwEl.value, 10) : 3;
+  const ps = passEl ? parseInt(passEl.value, 10) : 70;
+
+  if(!t||t<=0||!c||c<=0){ 
+    showToast('Enter valid positive numbers for time limit and questions count.'); 
+    return; 
+  }
+  const newSettings = {
+    timeLimitMin: t, 
+    questionCount: c,
+    maxSwitches: (ms > 0 ? ms : 3),
+    passingScore: (ps > 0 ? ps : 70)
+  };
+
+  DB.settings = newSettings;
+  showToast('Test settings saved and synchronized to candidate portal.');
+}
+
+async function changePw(){
+  const v=document.getElementById('newpw').value;
+  if(!v){ 
+    showToast('Enter a new password.'); 
+    return; 
+  }
+  DB.pw=v; 
+  try {
+    const res = await fetch('/api/exam-data/password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pw: v })
+    });
+    if (res.ok) {
+      showToast('Password updated and saved to secrets/admin_password.json in your workspace.');
+    } else {
+      showToast('Password updated in session.');
+    }
+  } catch(e) {
+    showToast('Password updated.');
+  }
+  document.getElementById('newpw').value='';
+}
+
+function go(view){ 
+  state.view=view; 
+  render(); 
+}
+
+function wireEvents(){
+  const b=document.getElementById('beginBtn'); if(b) b.onclick=startTest;
+  const c=document.getElementById('cname'); 
+  if(c) {
+    c.addEventListener('input', e => { state.candidateName = e.target.value; });
+    c.addEventListener('keydown', e => { if(e.key==='Enter') startTest(); });
+  }
+  const l=document.getElementById('loginBtn'); if(l) l.onclick=tryLogin;
+  const p=document.getElementById('apw'); if(p) p.addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+  const pf=document.getElementById('pdfInput'); if(pf) pf.addEventListener('change', handlePdfFile);
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+// Initialize App: SSE, Local Server Sync & JSONBin fallback
+(async function init(){
+  initSSE();
+  const synced = await fetchServerData(false);
+  if (!synced) {
+    await loadFromJSONBin();
+  }
+  render();
+
+  // Background fast polling for candidate portal & admin to guarantee multi-device updates
+  setInterval(() => {
+    if (state.view === 'landing' || (state.view === 'admin' && state.adminTab === 'cands')) {
+      fetchServerData(false);
+    }
+  }, 2000);
+})();
+</script>
+</body>
+</html>
